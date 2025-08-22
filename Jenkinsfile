@@ -23,19 +23,29 @@ pipeline {
      stage('Static Testing: SonarQube'){
         // when {
         //     branch 'main'
-        // }
+        // } plz work
         agent {
-            label 'code-quality'
+            label 'any'
         }
         steps {
             unstash 'code'
             script {
-                scannerHome = tool 'SonarQube' 
+                def scannerHome = tool 'SonarQube' 
             }
             withSonarQubeEnv('SonarQube') {
                 bat "$scannerHome\\bin\\sonar-scanner.bat"
             }
         } 
+    }
+    stage("Wait for Quality Gate") {
+        when {
+            branch 'main'
+        }
+        steps {
+            timeout(time: 2, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+            }
+        }
     }
   }    
     
