@@ -25,7 +25,7 @@ pipeline {
         //     branch 'main'
         // } plz work
         agent {
-            label 'any'
+            agent any
         }
         steps {
             unstash 'code'
