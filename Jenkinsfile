@@ -21,9 +21,9 @@ pipeline {
     }
 
      stage('Static Testing: SonarQube'){
-        when {
-            branch 'main'
-        }
+        // when {
+        //     branch 'main'
+        // }
         agent {
             label 'code-quality'
         }
