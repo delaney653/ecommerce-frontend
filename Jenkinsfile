@@ -7,8 +7,13 @@ pipeline {
   
   environment{
     VENV = 'venv'
+    REGISTRY_URL = 'docker.io'
+    IMAGE_NAME = 'delaney653/ecom-frontend'
     BUILD_TAG = "v1.0.$BUILD_NUMBER"
     IS_MAIN = "${env.BRANCH_NAME == 'main'}"
+    DEPLOY_ENV = "${env.BRANCH_NAME.startsWith('release/') ? 'staging' : 
+                      env.BRANCH_NAME == 'main' ? 'prod' : 
+                      env.BRANCH_NAME == 'develop' ? 'dev' : 'build'}"
   }
   stages{
     stage('Build Stage'){
@@ -16,10 +21,7 @@ pipeline {
       steps{
         checkout scm
         bat """
-            docker build ^
-                --cache-from ecom_frontend:latest ^
-                -t ecom_frontend:$BUILD_NUMBER ^
-                -t ecom_frontend:latest .
+            docker build -t ${IMAGE_NAME}:${BUILD_TAG} -t ${IMAGE_NAME}:latest .
         """
         stash includes: 'src/**, public/**, package*.json, Dockerfile, .eslintrc.json, sonar-project.properties', name: 'code'
       }
@@ -84,18 +86,24 @@ pipeline {
             '''
             }
     }
-    // stage('Staging'){
-    //     // should be done when release branch is created/updated
-    //     when {
-    //         branch 'release'
-    //     }
-    // }
-    // stage('Deploy'){
-    //     when {
-    //         branch 'main'
-    //     }
-    //     // this step is done when release + main are being merged
-    // }
+    stage('Container Push') {
+            when { 
+                anyOf { 
+                    branch 'develop'
+                    branch 'release/*'
+                    branch 'main'
+                }
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    bat """
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        docker push ${IMAGE_NAME}:${BUILD_TAG}
+                        docker push ${IMAGE_NAME}:latest
+                    """
+                }
+            }
+        }
   }    
     
     post {
