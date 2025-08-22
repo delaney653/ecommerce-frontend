@@ -25,17 +25,10 @@ pipeline {
         }
         steps {
             unstash 'code'
-            script {
-                try {
-                    bat '''
-                        npm install
-                        npx eslint src --ext .js,.jsx --format checkstyle --output-file eslint-checkstyle.xml
-                    '''
-                } catch (Exception e) {
-                    echo "ESLint found issues, but continuing pipeline..."
-                    currentBuild.result = 'UNSTABLE'
-                }
-            }
+            bat '''
+                npm install
+                npx eslint src --ext .js,.jsx --format checkstyle
+            '''
         }
     }
      stage('Security Scan: SonarQube'){
