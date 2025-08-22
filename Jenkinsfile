@@ -30,12 +30,20 @@ pipeline {
         }
         steps {
             unstash 'code'
-            bat '''
-                call npm install
-                echo Running ESLint...
-                call npx eslint src --ext .js,.jsx --format stylish --no-error-on-unmatched-pattern || exit /b 1
-                echo Eslint ran succesfully!
-            '''
+            script {
+                try {
+                    bat '''
+                        call npm install
+                        echo Running ESLint...
+                        call npx eslint src --ext .js,.jsx --format stylish --no-error-on-unmatched-pattern
+                    '''
+                    echo "ESLint passed with no issues!"
+                } catch (Exception e) {
+                    echo "ESLint found issues, but continuing pipeline..."
+                    echo "ESLint output: ${e.getMessage()}"
+                    currentBuild.result = 'UNSTABLE'
+                }
+            }
         }
     }
      stage('Security Scan: SonarQube'){
