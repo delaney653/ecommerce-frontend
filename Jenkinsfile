@@ -16,7 +16,6 @@ pipeline {
       steps{
         checkout scm
         bat """
-            docker pull ecom_frontend:latest || echo "No cache available"
             docker build ^
                 --cache-from ecom_frontend:latest ^
                 -t ecom_frontend:$BUILD_NUMBER ^
@@ -34,7 +33,8 @@ pipeline {
             bat '''
                 call npm install
                 echo Running ESLint...
-                call npx eslint src --ext .js,.jsx --format stylish || exit /b 1
+                call npx eslint src --ext .js,.jsx --format stylish --no-error-on-unmatched-pattern || exit /b 1
+                echo Eslint ran succesfully!
             '''
         }
     }
