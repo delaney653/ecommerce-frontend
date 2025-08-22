@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    networks:
+      - frontend_net
+    volumes:
+      - ./reports:/app/reports #save security reports
+networks:
+  frontend_net:
+
+#what do i need for frontend?
+#no database, so just a container with node js?
+#
