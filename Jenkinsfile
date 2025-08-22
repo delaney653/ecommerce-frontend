@@ -46,18 +46,46 @@ pipeline {
             }
         }
     }
-     stage('Security Scan: SonarQube'){
+    parallel{
+        stage('Security Scan: SonarQube'){
             agent any
-        steps {
-            unstash 'code'
-            script {
-                scannerHome = tool 'SonarQube' 
+            steps {
+                unstash 'code'
+                script {
+                    scannerHome = tool 'SonarQube' 
+                }
+                withSonarQubeEnv('SonarQube') {
+                    bat "$scannerHome\\bin\\sonar-scanner.bat"
+                }
+            } 
+        }
+        stage('Unit Tests') {
+            agent {
+                label 'any'
             }
-            withSonarQubeEnv('SonarQube') {
-                bat "$scannerHome\\bin\\sonar-scanner.bat"
+            steps {
+                unstash 'code'
+                bat '''
+                    call npm install
+                    echo Running unit tests...
+                    call npm run test:coverage
+                '''
             }
-        } 
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'coverage/lcov-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Coverage Report'
+                    ])
+                }
+            }
+        }
     }
+    
     // stage('Staging'){
     //     // should be done when release branch is created/updated
     //     when {
