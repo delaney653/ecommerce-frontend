@@ -16,7 +16,7 @@ pipeline {
       steps{
         checkout scm
         bat "docker build -t ecom_frontend:$BUILD_NUMBER -t ecom_frontend:latest ."
-        stash includes: '**/*', name: 'code'
+        stash includes: 'src/**, public/**, package*.json, Dockerfile, .eslintrc.js, sonar-project.properties', name: 'code'
       }
     }
     stage('Code Linting: ESLint') {
