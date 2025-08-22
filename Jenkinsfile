@@ -46,53 +46,55 @@ pipeline {
             }
         }
     }
-    parallel{
-        stage('Security Scan: SonarQube'){
-            agent any
-            steps {
-                unstash 'code'
-                script {
-                    scannerHome = tool 'SonarQube' 
+    stage('Parallel Check'){
+        parallel{
+            stage('Security Scan: SonarQube'){
+                agent any
+                steps {
+                    unstash 'code'
+                    script {
+                        scannerHome = tool 'SonarQube' 
+                    }
+                    withSonarQubeEnv('SonarQube') {
+                        bat "$scannerHome\\bin\\sonar-scanner.bat"
+                    }
+                } 
+            }
+            stage('Unit Tests') {
+                agent any
+                steps {
+                    unstash 'code'
+                    bat '''
+                        call npm install
+                        echo Running unit tests...
+                        call npm run test:unit
+                    '''
                 }
-                withSonarQubeEnv('SonarQube') {
-                    bat "$scannerHome\\bin\\sonar-scanner.bat"
+                post {
+                    always {
+                        publishHTML([
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'coverage/lcov-report',
+                            reportFiles: 'index.html',
+                            reportName: 'Coverage Report'
+                        ])
+                    }
                 }
-            } 
+            }
         }
-        stage('Unit Tests') {
+        stage('Integration Tests'){
             agent any
-            steps {
+                steps {
                 unstash 'code'
                 bat '''
                     call npm install
                     echo Running unit tests...
-                    call npm run test:unit
+                    call npm run test:integration
                 '''
-            }
-            post {
-                always {
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'coverage/lcov-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
-                    ])
                 }
-            }
         }
-    }
-    stage('Integration Tests'){
-        agent any
-            steps {
-            unstash 'code'
-            bat '''
-                call npm install
-                echo Running unit tests...
-                call npm run test:integration
-            '''
-            }
     }
     // stage('Staging'){
     //     // should be done when release branch is created/updated
