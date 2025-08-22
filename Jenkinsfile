@@ -15,7 +15,13 @@ pipeline {
         agent any
       steps{
         checkout scm
-        bat "docker build -t ecom_frontend:$BUILD_NUMBER -t ecom_frontend:latest ."
+        bat """
+            docker pull ecom_frontend:latest || echo "No cache available"
+            docker build ^
+                --cache-from ecom_frontend:latest ^
+                -t ecom_frontend:$BUILD_NUMBER ^
+                -t ecom_frontend:latest .
+        """
         stash includes: 'src/**, public/**, package*.json, Dockerfile, .eslintrc.json, sonar-project.properties', name: 'code'
       }
     }
@@ -66,7 +72,7 @@ pipeline {
             // archiveArtifacts artifacts: "artifacts/**", allowEmptyArchive: true
             
             // junit testResults: "reports/junit.xml", allowEmptyResults: true
-            
+             archiveArtifacts artifacts: 'reports/npm-audit-*.json', allowEmptyArchive: true
             slackSend channel: '#new-channel', color: '#2fff00ff', message: "Build #${BUILD_NUMBER} finished with status: ${currentBuild.currentResult} (<${env.BUILD_URL}|Details>)"
 
             script {
