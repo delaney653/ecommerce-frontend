@@ -56,18 +56,18 @@ pipeline {
             }
         } 
     }
-    stage('Staging'){
-        // should be done when release branch is created/updated
-        when {
-            branch 'release'
-        }
-    }
-    stage('Deploy'){
-        when {
-            branch 'main'
-        }
-        // this step is done when release + main are being merged
-    }
+    // stage('Staging'){
+    //     // should be done when release branch is created/updated
+    //     when {
+    //         branch 'release'
+    //     }
+    // }
+    // stage('Deploy'){
+    //     when {
+    //         branch 'main'
+    //     }
+    //     // this step is done when release + main are being merged
+    // }
   }    
     
     post {
