@@ -37,12 +37,6 @@ pipeline {
                 }
             }
         }
-        post {
-            always {
-                // Publish ESLint results
-                recordIssues enabledForFailure: true, tools: [esLint(pattern: 'eslint-checkstyle.xml')]
-            }
-        }
     }
      stage('Security Scan: SonarQube'){
             agent any
