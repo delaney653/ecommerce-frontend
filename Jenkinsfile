@@ -26,8 +26,9 @@ pipeline {
         steps {
             unstash 'code'
             bat '''
-                npm ci
-                npx eslint src --ext .js,.jsx
+                call npm install
+                echo Running ESLint...
+                call npx eslint src --ext .js,.jsx || exit /b 1
             '''
         }
     }
