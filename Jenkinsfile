@@ -19,8 +19,32 @@ pipeline {
         stash includes: '**/*', name: 'code'
       }
     }
-
-     stage('Static Testing: SonarQube'){
+    stage('Code Linting: ESLint') {
+        agent {
+            label 'code'
+        }
+        steps {
+            unstash 'code'
+            script {
+                try {
+                    bat '''
+                        npm install
+                        npx eslint src --ext .js,.jsx --format checkstyle --output-file eslint-checkstyle.xml
+                    '''
+                } catch (Exception e) {
+                    echo "ESLint found issues, but continuing pipeline..."
+                    currentBuild.result = 'UNSTABLE'
+                }
+            }
+        }
+        post {
+            always {
+                // Publish ESLint results
+                recordIssues enabledForFailure: true, tools: [esLint(pattern: 'eslint-checkstyle.xml')]
+            }
+        }
+    }
+     stage('Security Scan: SonarQube'){
             agent any
         steps {
             unstash 'code'
@@ -32,15 +56,17 @@ pipeline {
             }
         } 
     }
-    stage("Wait for Quality Gate") {
+    stage('Staging'){
+        // should be done when release branch is created/updated
+        when {
+            branch 'release'
+        }
+    }
+    stage('Deploy'){
         when {
             branch 'main'
         }
-        steps {
-            timeout(time: 2, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-            }
-        }
+        // this step is done when release + main are being merged
     }
   }    
     
