@@ -15,7 +15,7 @@ pipeline {
         agent any
       steps{
         checkout scm
-        bat "docker build -t frontend:$BUILD_NUMBER -t frontend:latest ."
+        bat "docker build -t ecom_frontend:$BUILD_NUMBER -t ecom_frontend:latest ."
         stash includes: '**/*', name: 'code'
       }
     }
