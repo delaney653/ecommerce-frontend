@@ -84,17 +84,17 @@ pipeline {
                 }
             }
         }
-        stage('Integration Tests'){
-            agent any
-                steps {
-                unstash 'code'
-                bat '''
-                    call npm install
-                    echo Running unit tests...
-                    call npm run test:integration
-                '''
-                }
-        }
+    }
+    stage('Integration Tests'){
+        agent any
+            steps {
+            unstash 'code'
+            bat '''
+                call npm install
+                echo Running unit tests...
+                call npm run test:integration
+            '''
+            }
     }
     // stage('Staging'){
     //     // should be done when release branch is created/updated
