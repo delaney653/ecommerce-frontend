@@ -26,8 +26,8 @@ pipeline {
         steps {
             unstash 'code'
             bat '''
-                npm install
-                npx eslint src --ext .js,.jsx --format checkstyle
+                npm ci
+                npx eslint src --ext .js,.jsx
             '''
         }
     }
