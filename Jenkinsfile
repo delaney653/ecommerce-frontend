@@ -60,15 +60,13 @@ pipeline {
             } 
         }
         stage('Unit Tests') {
-            agent {
-                label 'any'
-            }
+            agent any
             steps {
                 unstash 'code'
                 bat '''
                     call npm install
                     echo Running unit tests...
-                    call npm run test:coverage
+                    call npm run test:unit
                 '''
             }
             post {
@@ -83,6 +81,17 @@ pipeline {
                     ])
                 }
             }
+        }
+        stage('Integration Tests'){
+            agent any
+             steps {
+                unstash 'code'
+                bat '''
+                    call npm install
+                    echo Running unit tests...
+                    call npm run test:integration
+                '''
+             }
         }
     }
     
