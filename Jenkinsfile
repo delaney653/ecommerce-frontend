@@ -21,7 +21,7 @@ pipeline {
     }
     stage('Code Linting: ESLint') {
         agent {
-            label 'code'
+            label 'code-quality'
         }
         steps {
             unstash 'code'
