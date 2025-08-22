@@ -70,18 +70,6 @@ pipeline {
                         call npm run test:unit
                     '''
                 }
-                post {
-                    always {
-                        publishHTML([
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'coverage/lcov-report',
-                            reportFiles: 'index.html',
-                            reportName: 'Coverage Report'
-                        ])
-                    }
-                }
             }
         }
     }
