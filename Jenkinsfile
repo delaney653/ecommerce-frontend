@@ -21,12 +21,7 @@ pipeline {
     }
 
      stage('Static Testing: SonarQube'){
-        // when {
-        //     branch 'main'
-        // } plz work
-        agent {
             agent any
-        }
         steps {
             unstash 'code'
             script {
