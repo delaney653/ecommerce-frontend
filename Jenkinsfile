@@ -34,7 +34,7 @@ pipeline {
             bat '''
                 call npm install
                 echo Running ESLint...
-                call npx eslint src --ext .js,.jsx || exit /b 1
+                call npx eslint src --ext .js,.jsx --format stylish || exit /b 1
             '''
         }
     }
