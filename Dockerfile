@@ -16,7 +16,8 @@ RUN npm run build
 FROM node:24-alpine AS production
 WORKDIR /app
 
-RUN npm install -g serve
+RUN npm install -g serve \
+ && mkdir -p /app/reports   # <-- add this line
 COPY --from=builder /app/build ./build
 
 #copy the audit report from build stage
